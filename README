@@ -1,0 +1,45 @@
+Sokoban 3d
+---------------
+
+The Classic video game rewitten in html and Javascript.
+Usind the Three.js lib to show all in 3D.
+
+Controles:
+
+* up : Move ( Make one step )
+* left : Spin left
+* right : Spin right
+* m : Show map overview
+* n: next level
+* b: lest level
+* r: reset level
+
+The level are loded from the levels directory via json.
+The name has to be [1..n].json 
+A level is a 2 dimensional array which discrips every field on the map and is automatikly rendert.
+All field can be:
+* 0: for empty ground
+* 1: wall
+* 2: box
+* 3: end zone
+* 4: player starting point
+* 5: box + end zone
+* 6: free space
+* 7: end zone + player starting point
+
+It is posible to use the converter in this project to convert levels from http://www.sourcecode.se/sokoban/levels.php to my json format.
+
+Have Fun! And give me some feedback.
+
+TODO:
+
+	* More information to the README
+	* Better HUD
+	* Ingame Controle discription
+	* Level / Levelpack choice
+	* Skins
+	* Player Mesh
+	* animations
+	* HIGHTSCORE
+	*
+	*
