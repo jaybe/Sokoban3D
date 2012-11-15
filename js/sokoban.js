@@ -1,33 +1,43 @@
 	var three;
 	var renderer;
+	
+	var moving = 0; // indicats moving in progress and blocks other moves
+	var rotate = 0; // same to rotation
+	var loading = 0;
 	var cameratop;
 	var camera;
 	var player;
 	var levelcount = 1;
 	var you;
 	var steps;
-	var folder = "Bugs1005";
-	folder = "81";
-	var kiste = new THREE.MeshLambertMaterial({
+	var folder = "Original";
+	folder = "Original";
+	var kiste;
+	var ground;
+	var wallMaterial;		
+	var sky;	
+	var material;
+	var wire;
+	kiste = new THREE.MeshLambertMaterial({
 		map: THREE.ImageUtils.loadTexture("images/crate.jpg")
 	});
-	var ground = new THREE.MeshLambertMaterial({
+	ground = new THREE.MeshLambertMaterial({
 		map: THREE.ImageUtils.loadTexture("images/ground.jpg")
 	});
-	var wallMaterial = new THREE.MeshLambertMaterial({
+	wallMaterial = new THREE.MeshLambertMaterial({
 		map: THREE.ImageUtils.loadTexture("images/wall.jpg")
 	});		
-	var sky = new THREE.MeshLambertMaterial({
+	sky = new THREE.MeshLambertMaterial({
 		map: THREE.ImageUtils.loadTexture("images/Skybox.jpg")
 	});	
-	var material = new THREE.MeshLambertMaterial({
-            color: 0x0000ff
-        });
-	var wire = new THREE.MeshBasicMaterial({
+	material = new THREE.MeshLambertMaterial({
+			color: 0x0000ff
+		});
+	wire = new THREE.MeshBasicMaterial({
 		color : 0x00ff00,
 		wireframeLinewidth: 4,
 		wireframe: true
-	});	
+	});		
 	var textureImg = new Image();
         textureImg.src = "images/crate.jpg";
 		var textureImg2 = new Image();
@@ -51,22 +61,7 @@
         };
     })();
 
-    function animate(lastTime, angularSpeed, three){
-        // update
-        var date = new Date();
-        var time = date.getTime();
-        var timeDiff = time - lastTime;
-        var angleChange = angularSpeed * timeDiff * 2 * Math.PI / 1000;
-        lastTime = time;
- 
-        // render
-        three.renderer.render(three.scene, three.camera);
- 
-        // request new frame
-        requestAnimFrame(function(){
-            animate(lastTime, angularSpeed, three);
-        });
-    }
+
  
     window.onload = function() {
 	    renderer = new THREE.WebGLRenderer(); 
@@ -92,7 +87,7 @@
 		if( l ==undefined ) {
 		 l = levelcount;
 		}
-
+		loading = 1;
 		$.getJSON( "levels/" + folder + '/' + l + '.json', function(data) {
 			level = data;
 			levelcount = l;
@@ -252,7 +247,7 @@
  
 
 	   three.renderer.render(three.scene, three.camera);
-
+		loading = 0;
 
 }
 
@@ -285,7 +280,7 @@ function keypu (Ereignis) {
 }
 
 function keyp (Ereignis) {
-	if( ! three || ! three.camera ) {
+	if(loading || ! three || ! three.camera ) {
 		return;
 	}
 	if( Ereignis.which == 77 ) {
@@ -293,15 +288,17 @@ function keyp (Ereignis) {
 		//three.renderer.render(three.scene, );
 		//return;
 	}
+	if(! moving && ! rotate ) {
 	//console.log(you.position);
 	if( Ereignis.which == 37 ) { //left key
 		three.test.rotation.y +=  Math.PI / 2;
-		three.camera.rotation.y +=  Math.PI / 2;
+		rotate_cam_animate( new Date().getTime(), three, -Math.PI / 2, Math.PI / 50 );
 		you.rotation.z -=  Math.PI / 2;
 	}
 	if( Ereignis.which == 39 ) { //left right
 		three.test.rotation.y -=  Math.PI / 2;
-		three.camera.rotation.y -=  Math.PI / 2;
+		//three.camera.rotation.y -=  Math.PI / 2;
+		rotate_cam_animate( new Date().getTime(), three, Math.PI / 2, -Math.PI / 50 );
 		you.rotation.z +=  Math.PI / 2;
 	}
 	if( Ereignis.which == 38 ) { //left front
@@ -321,7 +318,8 @@ function keyp (Ereignis) {
 			three.test.position.z = z1;
 			steps--;
 		} else if(level[x][z] == 0 || level[x][z] == 3 ) {
-			three.camera.translateZ(-100); //  +=  15;
+			move_cam_animate( new Date().getTime(), three, 100);
+			//three.camera.translateZ(-100); //  +=  15;
 		} else if((level[x][z] == 2 || level[x][z] == 5 ) && level[x+x2][z+z2] != 1 && level[x+x2][z+z2] != 2 && level[x+x2][z+z2] != 5 ) {
 			var found = 0;
 			//console.log("search box" +  x*100  + " " + z * 100);
@@ -334,7 +332,8 @@ function keyp (Ereignis) {
 					level[x+x2][z+z2] = level[x+x2][z+z2] + 2;
 					b.position.x = (x+x2)*100;
 					b.position.z = (z+z2)*100;
-					three.camera.translateZ(-100); //  +=  15;
+					//three.camera.translateZ(-100); //  +=  15;			
+					move_cam_animate( new Date().getTime(), three, 100);
 				}
 			}
 			if( ! found ) {
@@ -348,6 +347,7 @@ function keyp (Ereignis) {
 			three.test.position.z = z1;	
 		}
 
+	}
 	}
 	if( Ereignis.which == 66) {
 		loadLevel(levelcount - 1);
@@ -380,3 +380,70 @@ function keyp (Ereignis) {
 	//console.log(Ereignis.which);
 	//Ereignis.preventDefault();
 }
+
+    function  rotate_cam_animate(lastTime, three, distance, step){
+        // update
+		rotate = 1;
+        var date = new Date();
+        var time = date.getTime();
+        var timeDiff = time - lastTime;
+		if(timeDiff > 3 ) {
+			distance = distance + step;
+			three.camera.rotation.y += step;
+			if( Math.abs(distance) < Math.abs(step) ) {
+				three.camera.rotation.y += -distance
+				distance = 0;
+			}
+			lastTime = time;
+
+		}
+		three.renderer.render(three.scene, three.rendercam);
+		if(distance == 0 ) {
+			rotate = 0;
+			return;
+		}
+        
+        // render
+
+ 
+        // request new frame
+        requestAnimFrame(function(){
+            rotate_cam_animate(lastTime, three, distance, step);
+        });
+    }
+
+    function move_cam_animate(lastTime, three, distance){
+        // update
+		moving = 1;
+        var date = new Date();
+        var time = date.getTime();
+        var timeDiff = time - lastTime;
+		if(timeDiff > 1 ) {
+			if(distance < 10 ) {
+				
+				three.camera.translateZ(- distance);
+				distance = 0 ;
+			} else {
+				distance = distance - 8;
+				three.camera.translateZ(-8);
+			}
+			
+			 //  +=  15;
+			lastTime = time;
+		}
+		three.renderer.render(three.scene, three.rendercam);
+		if(distance <= 0 ) {
+			moving = 0;
+			return;
+		}
+         
+        // render
+        
+ 
+        // request new frame
+        requestAnimFrame(function(){
+            move_cam_animate(lastTime, three, distance);
+        });
+    }
+	
+
