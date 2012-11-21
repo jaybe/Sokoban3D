@@ -11,7 +11,7 @@
 	var you;
 	var steps;
 	var folder = "Original";
-	folder = "Original";
+	//folder = "";
 	var kiste;
 	var ground;
 	var wallMaterial;		
@@ -64,6 +64,10 @@
 
  
     window.onload = function() {
+	
+		$('#left').click(function(event){ left(event)});
+		$('#up').click(function(event){ up(event)});
+		$('#right').click(function(event){ right(event)});
 	    renderer = new THREE.WebGLRenderer(); 
         renderer.setSize(window.innerWidth-20, window.innerHeight-20);
         document.body.appendChild(renderer.domElement);
@@ -279,31 +283,32 @@ function keypu (Ereignis) {
 	}	
 }
 
-function keyp (Ereignis) {
-	if(loading || ! three || ! three.camera ) {
+function left(Ereignis) {
+	if(loading || ! three || ! three.camera || moving || rotate ) {
 		return;
 	}
-	if( Ereignis.which == 77 ) {
-		three.rendercam = three.cameratop;
-		//three.renderer.render(three.scene, );
-		//return;
-	}
-	if(! moving && ! rotate ) {
-	//console.log(you.position);
-	if( Ereignis.which == 37 ) { //left key
 		three.test.rotation.y +=  Math.PI / 2;
 		rotate_cam_animate( new Date().getTime(), three, -Math.PI / 2, Math.PI / 50 );
 		you.rotation.z -=  Math.PI / 2;
-	}
-	if( Ereignis.which == 39 ) { //left right
+		Ereignis.preventDefault();
+}
+
+function right(Ereignis) {
+	if(loading || ! three || ! three.camera || moving || rotate ) {
+		return;
+	}		
 		three.test.rotation.y -=  Math.PI / 2;
-		//three.camera.rotation.y -=  Math.PI / 2;
 		rotate_cam_animate( new Date().getTime(), three, Math.PI / 2, -Math.PI / 50 );
 		you.rotation.z +=  Math.PI / 2;
+		Ereignis.preventDefault();
+}
+
+function up(Ereignis) {
+	if(loading || ! three || ! three.camera || moving || rotate ) {
+		return;
 	}
-	if( Ereignis.which == 38 ) { //left front
-		//three.camera.position.x +=  15;
-		var x1 = Math.round(three.test.position.x);
+
+	var x1 = Math.round(three.test.position.x);
 		var z1 = Math.round(three.test.position.z);
 		three.test.translateZ(1);
 		three.renderer.render(three.scene, three.camera);
@@ -346,6 +351,36 @@ function keyp (Ereignis) {
 			three.test.position.x = x1; 
 			three.test.position.z = z1;	
 		}
+	you.position = camera.position;
+	updateInfo();
+	three.renderer.render(three.scene, three.rendercam);
+	if( checkWin() ) {
+
+		loadLevel(levelcount + 1);
+	}
+	Ereignis.preventDefault();
+}
+
+function keyp (Ereignis) {
+	if(loading || ! three || ! three.camera ) {
+		return;
+	}
+	if( Ereignis.which == 77 ) {
+		three.rendercam = three.cameratop;
+		//three.renderer.render(three.scene, );
+		//return;
+	}
+	if(! moving && ! rotate ) {
+	//console.log(you.position);
+	if( Ereignis.which == 37 ) { //left key
+		left(Ereignis);
+	}
+	if( Ereignis.which == 39 ) { //left right
+		right(Ereignis);
+	}
+	if( Ereignis.which == 38 ) { //left front
+		//three.camera.position.x +=  15;
+		up(Ereignis);
 
 	}
 	}
@@ -359,7 +394,7 @@ function keyp (Ereignis) {
 		loadLevel(levelcount);
 	}
 	you.position = camera.position;
-		updateInfo();
+	updateInfo();
 	three.renderer.render(three.scene, three.rendercam);
 	if( checkWin() ) {
 
@@ -387,16 +422,16 @@ function keyp (Ereignis) {
         var date = new Date();
         var time = date.getTime();
         var timeDiff = time - lastTime;
-		if(timeDiff > 3 ) {
+//		if(timeDiff > 3 ) {
 			distance = distance + step;
 			three.camera.rotation.y += step;
-			if( Math.abs(distance) < Math.abs(step) ) {
+			if( Math.abs(distance) < Math.abs(step) || timeDiff > 250 ) {
 				three.camera.rotation.y += -distance
 				distance = 0;
 			}
-			lastTime = time;
+//			lastTime = time;
 
-		}
+//		}
 		three.renderer.render(three.scene, three.rendercam);
 		if(distance == 0 ) {
 			rotate = 0;
@@ -418,8 +453,8 @@ function keyp (Ereignis) {
         var date = new Date();
         var time = date.getTime();
         var timeDiff = time - lastTime;
-		if(timeDiff > 1 ) {
-			if(distance < 10 ) {
+//		if(timeDiff > 1 ) {
+			if(distance < 10 || timeDiff > 250 ) {
 				
 				three.camera.translateZ(- distance);
 				distance = 0 ;
@@ -430,7 +465,7 @@ function keyp (Ereignis) {
 			
 			 //  +=  15;
 			lastTime = time;
-		}
+//		}
 		three.renderer.render(three.scene, three.rendercam);
 		if(distance <= 0 ) {
 			moving = 0;

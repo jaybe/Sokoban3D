@@ -6,11 +6,18 @@
 	<script src="js/jquery-1.8.2.min.js" type="text/javascript" ></script>
 	<script src="js/sokoban.js" type="text/javascript" ></script>
 	<style>
-	#info { position: absolute; bottom: 30px; left: 30px; color: white; text-align: center; z-index: 100; display:block; }
+	#info { position: absolute; bottom: 30px; left: 30px; color: #D0D0D0; text-align: center; z-index: 100; display:block; }
+	#controles { position: absolute; bottom: 30px; right: 30px; color: white; text-align: center; z-index: 100; display:block; }
+	.controle { display : inline-block; width: 50px; height: 60px; position: relativ; z-index: 101;} 
 	</style>
 </head>
 <body>
 <div id="info"></div>
+<div id="controles">
+	<div id="left" class="controle"	style="background-image: url(images/right.png); "></div>
+	<div id="up" class="controle" style="background-image: url(images/up.png); "></div>
+	<div id="right" class="controle" style="background-image: url(images/left.png); "></div>
+</div> 
 </body>
 </html>
 
